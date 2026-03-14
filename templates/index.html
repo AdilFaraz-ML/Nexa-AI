@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexa AI</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<!-- Diagonal Rectangle Background -->
+<div class="background">
+
+  <!-- White -->
+  <div class="rect white lane1"></div>
+  <div class="rect white lane2"></div>
+
+  <!-- Blue -->
+  <div class="rect blue lane4"></div>
+
+  <!-- Yellow -->
+  <div class="rect yellow lane5"></div>
+
+</div>
+
+  <div class="chatbot-container">
+    <div class="chatbot-header">
+      <img src="{{ url_for('static', filename='iub_logo.png') }}" alt="IUB Logo" />
+    </div>
+
+    <div class="chat-area" id="chat-area">
+      <div class="message bot">Hello! How can I help you today?</div>
+    </div>
+
+  <div class="input-area">
+  <div class="input-wrapper">
+    <input type="text" id="user-input" placeholder="Ask Me..." />
+    <button id="send-btn" class="send-btn">
+      <svg xmlns="http://www.w3.org/2000/svg"
+           width="18"
+           height="18"
+           fill="currentColor"
+           viewBox="0 0 16 16">
+        <!-- UPWARD ARROW -->
+        <path d="M8 1l5 6H9v7H7V7H3l5-6z"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+  <script>
+    const chatArea = document.getElementById('chat-area');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    // Function to append messages
+    function addMessage(message, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.classList.add('message', sender);
+      msgDiv.textContent = message;
+      chatArea.appendChild(msgDiv);
+      chatArea.scrollTop = chatArea.scrollHeight; 
+    }
+
+    // Function to get bot reply
+    async function botReply(userText) {
+      let reply;
+
+      // Check for predefined keywords first
+      if (userText.toLowerCase().includes("admission")) {
+        reply = "📚 Admissions are open! Visit the IUB official website for details. ";
+      } else if (userText.toLowerCase().includes("contact")) {
+        reply = "☎️ You can contact IUB at +92-62-9250235.";
+      } else if (userText.toLowerCase().includes("help")) {
+        reply = "🤖 Sure! I'm here to assist. Ask me about admissions, departments, or events.";
+      } else {
+        // If no keywords match, call backend API
+        try {
+          const response = await fetch('/get_response', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: userText })
+          });
+          const data = await response.json();
+          reply = data.reply;
+        } catch (err) {
+          reply = "⚠️ Sorry, I couldn't connect to the server. Please try again later.";
+        }
+      }
+
+      setTimeout(() => addMessage(reply, 'bot'), 600);
+    }
+
+    // Function to handle sending
+    async function handleSend() {
+      const text = userInput.value.trim();
+      if (text === "") return;
+      addMessage(text, 'user');
+      userInput.value = "";
+      await botReply(text);
+    }
+
+    // Event listeners
+    sendBtn.addEventListener('click', handleSend);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+  </script>
+
+</body>
+</html>

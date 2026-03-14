@@ -1,0 +1,8 @@
+flask
+sentence-transformers
+faiss-cpu
+torch
+numpy==1.26.4
+pinecone==8.x
+
+pip install -r requirements.txt
