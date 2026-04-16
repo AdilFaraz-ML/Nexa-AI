@@ -4,77 +4,194 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nexa AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<!-- Diagonal Rectangle Background -->
-<div class="background">
+  <!-- Global Header-->
+   
+  <header class="global-header">
+    <div class="header-inner">
+      <a href="#chatbot" class="header-brand">
+        <img src="{{ url_for('static', filename='iub_logo.png') }}" alt="IUB Logo" />
+        <span>Nexa AI</span>
+      </a>
+      <nav class="header-nav">
+        <a href="#chatbot">Chatbot</a>
+        <a href="#faqs">FAQ's</a>
+      </nav>
+    </div>
+  </header>
 
-  <!-- White -->
-  <div class="rect white lane1"></div>
-  <div class="rect white lane2"></div>
+  <!-- ══ Chatbot Section ══ -->
+  <section id="chatbot" class="chatbot-section">
 
-  <!-- Blue -->
-  <div class="rect blue lane4"></div>
-
-  <!-- Yellow -->
-  <div class="rect yellow lane5"></div>
-
-</div>
-
-  <div class="chatbot-container">
-    <div class="chatbot-header">
-      <img src="{{ url_for('static', filename='iub_logo.png') }}" alt="IUB Logo" />
+    <div class="background">
+      <div class="rect white lane1"></div>
+      <div class="rect white lane2"></div>
+      <div class="rect blue lane4"></div>
+      <div class="rect yellow lane5"></div>
     </div>
 
-    <div class="chat-area" id="chat-area">
-      <div class="message bot">Hello! How can I help you today?</div>
+    <div class="chatbot-container">
+      <div class="chatbot-header">
+        <img src="{{ url_for('static', filename='iub_logo.png') }}" alt="IUB Logo" />
+      </div>
+
+      <div class="chat-area" id="chat-area">
+        <div class="message bot">Hello! How can I help you today?</div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-wrapper">
+          <input type="text" id="user-input" placeholder="Ask Me..." />
+          <button id="send-btn" class="send-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 1l5 6H9v7H7V7H3l5-6z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
 
-  <div class="input-area">
-  <div class="input-wrapper">
-    <input type="text" id="user-input" placeholder="Ask Me..." />
-    <button id="send-btn" class="send-btn">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           width="18"
-           height="18"
-           fill="currentColor"
-           viewBox="0 0 16 16">
-        <!-- UPWARD ARROW -->
-        <path d="M8 1l5 6H9v7H7V7H3l5-6z"/>
-      </svg>
-    </button>
-  </div>
-</div>
+  </section>
+
+  <!-- ══ FAQ's Section ══ -->
+  <section id="faqs" class="faq-section">
+    
+    <h2 class="section-title">Frequently Asked Questions</h2>
+    <p class="section-desc">Everything you need to know about IUB and Nexa AI. Can't find an answer? Chat with the bot above.</p>
+
+    <div class="faq-grid">
+
+      <div class="faq-col">
+        <div class="faq-item">
+          <div class="faq-question">What is Nexa AI? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Nexa AI is the official AI-powered chatbot of Islamia University of Bahawalpur (IUB). It answers queries about transport, departments, contacts, admissions, and more.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">How do I use the chatbot? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Simply type your question in the chat input and press Enter or click the send button. The bot will reply instantly.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What are the university transport timings? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Afternoon transport services start from 12:00 PM onwards on all major university routes, effective from 03 December 2025.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">How can I contact IUB administration? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">You can contact IUB at +92-62-9250235 or visit the main campus at Bahawalpur. The chatbot can also direct you to the relevant department.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Is admissions information available on Nexa AI? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Yes! Ask the chatbot about current admissions, eligibility criteria, and deadlines. You can also visit the IUB official website for the latest notifications.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What departments does IUB have? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">IUB has departments covering Sciences, Arts, Engineering, Commerce, Islamic Studies, Law, and more. Ask the chatbot for contact details of any specific department.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can Nexa AI help with exam schedules? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Yes, Nexa AI can provide information about exam schedules if that data has been loaded into its knowledge base.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Does Nexa AI work 24/7? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Yes, Nexa AI is available around the clock. For urgent administrative matters, we recommend contacting university staff directly during office hours.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Which campuses does IUB have? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">IUB operates multiple campuses including Baghdad-ul-Jadeed, Abbasia Campus, Khawaja Fareed Campus, and Rahim Yar Khan Campus.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What language does the chatbot support? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Currently Nexa AI primarily supports English. Urdu language support may be added in future updates.</div>
+        </div>
+      </div>
+
+      <div class="faq-col">
+        <div class="faq-item">
+          <div class="faq-question">How does Nexa AI find answers? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Nexa AI uses a RAG pipeline powered by LangChain and Pinecone to search a university knowledge base and generate accurate responses.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Is my chat data stored? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Conversations may be logged for quality improvement purposes. No personally identifiable information is shared with third parties.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What if the bot gives a wrong answer? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">If you receive an incorrect answer, please contact the relevant university department directly. You can also report the issue to the development team.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">How do I find my department's contact? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Ask the chatbot something like "What is the contact number for the Computer Science department?" and it will retrieve the relevant details.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can I ask about hostel facilities? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Yes, ask the chatbot about hostel availability, fees, and contacts. IUB provides separate hostels for male and female students across its campuses.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What are the library timings? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">The Central Library is generally open from 8:00 AM to 8:00 PM on weekdays. Ask the chatbot for the latest or specific campus library hours.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">How can I apply to IUB? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Applications are submitted through the IUB admissions portal. The chatbot can guide you to the correct URL and explain required documents.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Is there a fee structure available? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Yes, you can ask the chatbot about semester fees for various programs. Official fee structures are also posted on the IUB website each academic year.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can I get bus route details from the bot? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Absolutely. Ask about specific stops like BJC, AC, KH, or FC and Nexa AI will return the relevant transport route and timing information.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Who built Nexa AI? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">Nexa AI was developed as a Final Year Project (FYP) by an IUB Computer Science student using LangChain, Pinecone, Flask, and OpenAI APIs.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ Global Footer ══ -->
+  <footer class="global-footer">
+    <div class="footer-inner">
+      <div class="footer-links">
+        <a href="#chatbot">Chatbot</a>
+        <a href="#faqs">FAQ's</a>
+        <a href="https://www.iub.edu.pk" target="_blank" rel="noopener">IUB Website</a>
+      </div>
+      <p class="footer-copy">&copy; 2026 Nexa AI &mdash; Islamia University of Bahawalpur. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script>
-    const chatArea = document.getElementById('chat-area');
+    // Chatbot Functionality
+    const chatArea  = document.getElementById('chat-area');
     const userInput = document.getElementById('user-input');
-    const sendBtn = document.getElementById('send-btn');
+    const sendBtn   = document.getElementById('send-btn');
 
-    // Function to append messages
     function addMessage(message, sender) {
       const msgDiv = document.createElement('div');
       msgDiv.classList.add('message', sender);
       msgDiv.textContent = message;
       chatArea.appendChild(msgDiv);
-      chatArea.scrollTop = chatArea.scrollHeight; 
+      chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    // Function to get bot reply
     async function botReply(userText) {
       let reply;
-
-      // Check for predefined keywords first
-      if (userText.toLowerCase().includes("admission")) {
-        reply = "📚 Admissions are open! Visit the IUB official website for details. ";
-      } else if (userText.toLowerCase().includes("contact")) {
-        reply = "☎️ You can contact IUB at +92-62-9250235.";
-      } else if (userText.toLowerCase().includes("help")) {
-        reply = "🤖 Sure! I'm here to assist. Ask me about admissions, departments, or events.";
+      const lower = userText.toLowerCase();
+      if (lower.includes("admission")) {
+        reply = "Admissions are open! Visit the IUB official website for details.";
+      } else if (lower.includes("contact")) {
+        reply = "You can contact IUB at +92-62-9250235.";
+      } else if (lower.includes("help")) {
+        reply = "Sure! I'm here to assist. Ask me about admissions, departments, or events.";
       } else {
-        // If no keywords match, call backend API
         try {
           const response = await fetch('/get_response', {
             method: 'POST',
@@ -87,23 +204,28 @@
           reply = "⚠️ Sorry, I couldn't connect to the server. Please try again later.";
         }
       }
-
       setTimeout(() => addMessage(reply, 'bot'), 600);
     }
 
-    // Function to handle sending
     async function handleSend() {
       const text = userInput.value.trim();
-      if (text === "") return;
+      if (!text) return;
       addMessage(text, 'user');
       userInput.value = "";
       await botReply(text);
     }
 
-    // Event listeners
     sendBtn.addEventListener('click', handleSend);
-    userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleSend();
+    userInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSend(); });
+
+    // FAQ's Accordion Functionality
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const item = q.parentElement;
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+        if (!isOpen) item.classList.add('open');
+      });
     });
   </script>
 
