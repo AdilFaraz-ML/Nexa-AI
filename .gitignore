@@ -1,8 +1,3 @@
-notepad "D:\Final Year Project\Chatbot\.gitignore"
-```
-
-**Step 2 — Replace everything in it with this:**
-```
 # Virtual environment
 venv/
 env/
@@ -21,3 +16,6 @@ __pycache__/
 # Windows
 Thumbs.db
 desktop.ini
+
+# Database
+university.db
