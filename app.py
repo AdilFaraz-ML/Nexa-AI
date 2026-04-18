@@ -1,30 +1,68 @@
-import json
 import os
 import sqlite3
-import numpy as np
-import faiss
+from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
-from sentence_transformers import SentenceTransformer
+from langchain_pinecone import PineconeVectorStore
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_groq import ChatGroq
+from langchain_classic.chains import RetrievalQA
+from langchain_core.prompts import PromptTemplate
 
+load_dotenv()
 
-# Initialize Flask app
 app = Flask(__name__)
 
-# Initialize Embedding Model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+# Same embedding model — must match what you used in vector_store.py
+embeddings = HuggingFaceEmbeddings(
+    model_name="sentence-transformers/all-MiniLM-L6-v2"
+)
 
-# Load Transport JSON & Create Embeddings
-with open("transport_schedule.json", "r", encoding="utf-8") as f:
-    transport_data = json.load(f)
+# Load Pinecone vectorstore
+vectorstore = PineconeVectorStore.from_existing_index(
+    index_name="iub-chatbot",
+    embedding=embeddings
+)
 
-transport_texts = [item["content"] for item in transport_data]
-transport_embeddings = model.encode(transport_texts, convert_to_numpy=True)
+# Retriever
+retriever = vectorstore.as_retriever(
+    search_type="mmr",
+    search_kwargs={"k": 3}
+)
 
-dimension = transport_embeddings.shape[1]
-faiss_index = faiss.IndexFlatL2(dimension)
-faiss_index.add(transport_embeddings)
+# LLM
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"))
 
-# Database setup
+
+
+# Custom prompt — keeps answers focused on IUB
+prompt_template = """
+You are Nexa AI, an assistant for Islamia University of Bahawalpur (IUB).
+Answer the question using only the context provided below.
+If the answer is not in the context, say: "I don't have that information right now. Please contact the university directly."
+Keep answers clear and concise.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:
+"""
+
+prompt = PromptTemplate(
+    template=prompt_template,
+    input_variables=["context", "question"]
+)
+
+# QA Chain
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=retriever,
+    chain_type="stuff",
+    chain_type_kwargs={"prompt": prompt}
+)
+
+# Database setup — kept exactly as before
 def init_db():
     if not os.path.exists("university.db"):
         conn = sqlite3.connect("university.db")
@@ -66,7 +104,7 @@ def init_db():
 
         c.execute("""
             INSERT INTO faqs (question, answer, category)
-            VALUES ('How can I reset my portal password?', 'Go to “Forgot Password” on the portal login page.', 'Portal Help')
+            VALUES ('How can I reset my portal password?', 'Go to "Forgot Password" on the portal login page.', 'Portal Help')
         """)
 
         conn.commit()
@@ -82,39 +120,37 @@ def index():
 
 @app.route("/get_response", methods=["POST"])
 def get_response():
-    user_msg = request.json.get("message", "").lower()
+    user_msg = request.json.get("message", "").strip()
 
-    # Departments
-    conn = sqlite3.connect("university.db")            
+    if not user_msg:
+        return jsonify({"reply": "Please enter a message."})
+
+    # 1. Department keyword match — kept from your original
+    conn = sqlite3.connect("university.db")
     c = conn.cursor()
     c.execute("SELECT department_name, contact_number FROM departments")
     for dept, contact in c.fetchall():
-        if dept.lower() in user_msg:
+        if dept.lower() in user_msg.lower():
             conn.close()
-            return jsonify({"reply": f" {dept} contact number is {contact}."})
+            return jsonify({"reply": f"{dept} contact number is {contact}."})
 
-    # FAQs
+    # 2. FAQ keyword match — kept from your original
     c.execute("SELECT question, answer FROM faqs")
     for question, answer in c.fetchall():
-        if question.lower() in user_msg:
+        if question.lower() in user_msg.lower():
             conn.close()
             return jsonify({"reply": answer})
 
     conn.close()
 
-    # Transport (Embeddings of Transport) 
-    query_embedding = model.encode([user_msg], convert_to_numpy=True)
-    distances, indices = faiss_index.search(query_embedding, k=2)
+    # 3. LangChain RAG — replaces FAISS
+    try:
+        response = qa_chain.invoke({"query": user_msg})
+        return jsonify({"reply": response["result"]})
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"reply": "Something went wrong. Please try again."})
 
-    if distances[0][0] < 1.2: 
-        answers = [transport_texts[i] for i in indices[0]]
-        return jsonify({"reply": " " + " ".join(answers)})
 
-    # Fallback 
-    return jsonify({
-        "reply": "I'm still learning. Please ask about admission, fees, or bus schedules details."
-    })
-
-# Run App
 if __name__ == "__main__":
     app.run(debug=True)
