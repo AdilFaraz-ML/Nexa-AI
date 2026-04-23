@@ -30,29 +30,70 @@ retriever = vectorstore.as_retriever(
 )
 
 # LLM
-llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"))
+llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    temperature=0,
+    groq_api_key=os.getenv("GROQ_API_KEY")
+)
 
 
+# System Prompt
 
-# Custom prompt — keeps answers focused on IUB
-prompt_template = """
-You are Nexa AI, an assistant for Islamia University of Bahawalpur (IUB).
-Answer the question using only the context provided below.
-If the answer is not in the context, say: "I don't have that information right now. Please contact the university directly."
-Keep answers clear and concise.
+PROMPT_TEMPLATE = """
+You are Nexa AI, the official AI assistant of Islamia University of Bahawalpur (IUB).
+Your job is to answer student queries accurately and concisely using ONLY the context below.
+Never make up information. Never paste context as-is.
 
-Context:
+━━━ RESPONSE RULES ━━━
+
+1. LISTING QUESTIONS ("which", "what are", "how many", "list"):
+   - Return ONLY the count (if asked) and names.
+   - Do NOT include eligibility, procedure, or details unless the student explicitly asks.
+   - Example: "How many scholarships for BS?" → "There are 5 departmental scholarships: Needy Fee Remission, Kinship, Hafiz-e-Quran, Position Holder, and Orphan."
+
+2. YES/NO QUESTIONS ("is there", "are admissions open", "is any bus available"):
+   - Always start with YES or NO.
+   - Then add only the directly relevant detail (date, time, route).
+   - Do NOT elaborate beyond what was asked.
+   - Example: "Are admissions open?" → "Yes, Fall admissions are open. Last date to apply is [date]."
+
+3. BUS / TRANSPORT TIMING QUESTIONS:
+   - If a bus exists at the requested time and route → say YES and give that timing.
+   - If NO exact match → say NO, then suggest the nearest available timing (before or after).
+   - Example: "Is there a bus at 3 PM from BJC to AC?" → "No bus at exactly 3:00 PM on that route. The nearest option is at 3:30 PM / 2:30 PM."
+
+4. PROCEDURE QUESTIONS ("how to", "how can I", "steps to"):
+   - Give a clean numbered step-by-step answer.
+   - Keep each step short and actionable.
+
+5. ELIGIBILITY QUESTIONS ("eligibility", "criteria", "who can apply", "requirements"):
+   - Return ONLY the eligibility criteria for what was asked.
+   - Do not mix in the application procedure.
+
+6. UNKNOWN / OUT OF SCOPE:
+   - If the answer is not in the context, respond:
+     "I don't have that information right now. Please contact IUB official website or E-portal."
+
+━━━ STRICT RULES ━━━
+- NEVER dump the full chunk as a response.
+- NEVER answer in more detail than the question requires.
+- ALWAYS respond in plain natural language, not raw text from context.
+- If the student asks a follow-up (e.g., "what is the eligibility for that?"), answer only the follow-up.
+
+━━━ CONTEXT ━━━
 {context}
 
-Question: {question}
+━━━ STUDENT QUESTION ━━━
+{question}
 
-Answer:
+━━━ YOUR ANSWER ━━━
 """
 
 prompt = PromptTemplate(
-    template=prompt_template,
+    template=PROMPT_TEMPLATE,
     input_variables=["context", "question"]
 )
+
 
 # QA Chain
 qa_chain = RetrievalQA.from_chain_type(
@@ -62,7 +103,9 @@ qa_chain = RetrievalQA.from_chain_type(
     chain_type_kwargs={"prompt": prompt}
 )
 
-# Database setup — kept exactly as before
+
+# Database Setup
+
 def init_db():
     if not os.path.exists("university.db"):
         conn = sqlite3.connect("university.db")
@@ -114,6 +157,7 @@ def init_db():
 init_db()
 
 # Routes
+
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -125,7 +169,7 @@ def get_response():
     if not user_msg:
         return jsonify({"reply": "Please enter a message."})
 
-    # 1. Department keyword match — kept from your original
+    # 1. Department keyword match
     conn = sqlite3.connect("university.db")
     c = conn.cursor()
     c.execute("SELECT department_name, contact_number FROM departments")
@@ -134,7 +178,7 @@ def get_response():
             conn.close()
             return jsonify({"reply": f"{dept} contact number is {contact}."})
 
-    # 2. FAQ keyword match — kept from your original
+    # 2. FAQ keyword match
     c.execute("SELECT question, answer FROM faqs")
     for question, answer in c.fetchall():
         if question.lower() in user_msg.lower():
@@ -143,7 +187,7 @@ def get_response():
 
     conn.close()
 
-    # 3. LangChain RAG — replaces FAISS
+    # 3. LangChain RAG — Pinecone + Groq
     try:
         response = qa_chain.invoke({"query": user_msg})
         return jsonify({"reply": response["result"]})
