@@ -37,334 +37,262 @@
 
 ---
 
-## 📖 About the Project
 
-**Nexa-AI** is a university-specific intelligent chatbot designed to assist IUB students by answering queries related to the IUB E-Portal in real time. Instead of navigating through multiple portal pages, students can simply ask questions and receive accurate, direct answers — along with relevant page links.
+Here's the full README in markdown — ready to copy-paste:
 
-> **Example:** A student asks: *"Where can I find my transcript?"*  
-> Nexa-AI responds: *"Your transcript is available on Page 5 of the E-Portal under Academic Records. [Direct Link]"*
+```markdown
+# Nexa AI — IUB Intelligent Chatbot
 
-The system uses **LangChain**, **Pinecone**, and **Generative AI** techniques, including chunking, indexing, and metadata tagging, to build a powerful knowledge retrieval pipeline over IUB's official data.
+A Retrieval-Augmented Generation (RAG) chatbot built for students of The Islamia University of Bahawalpur (IUB), providing instant answers on scholarships, admissions, transportation, and general university queries.
 
-Developed as a **Final Year Project** at the Department of Computer Science, IUB — Session Fall 2022–2026.
-
----
-
-## ✨ Key Features
-
-- 🎓 **Scholarship Inquiry** — Lists available scholarships, eligibility criteria, and application procedures
-- 🚌 **Transportation Assistance** — Provides bus routes, timings, pickup/drop points, and schedule details
-- 📋 **Admission Guidance** — Step-by-step support for NAT test registration, merit lists, and required documents
-- 💬 **General Queries** — Answers questions about departments, contact numbers, and key university personnel
-- 🔗 **E-Portal Page Navigation** — Directs students to exact portal pages with direct links
-- ⚡ **Real-Time Responses** — Processes and returns answers within 2 seconds
-- 🧠 **Intent Detection** — NLP-based understanding of user query intent using Transformers
-- 📚 **RAG Pipeline** — Retrieval-Augmented Generation using LangChain + Pinecone for context-aware answers
+![Python 3.11](https://img.shields.io/badge/Python-3.11-blue)
+![Flask](https://img.shields.io/badge/Flask-3.x-blue)
+![LangChain](https://img.shields.io/badge/LangChain-latest-blue)
+![Pinecone](https://img.shields.io/badge/Pinecone-latest-blue)
+![Groq](https://img.shields.io/badge/Groq-Llama_3.3_70B-orange)
+![FYP](https://img.shields.io/badge/FYP-Session_2022--2026-green)
 
 ---
 
-## 🛠️ Tech Stack
+## About the project
 
-| Layer | Technology |
-|---|---|
-| Frontend | HTML, CSS, JavaScript |
-| Backend | Python, Flask |
-| NLP / ML | Transformers, Scikit-learn, NLTK |
-| GenAI Orchestration | LangChain |
-| Vector Database | Pinecone |
-| Embeddings | Sentence Transformers / OpenAI Embeddings |
-| Data Format | JSON, CSV |
-| Development Methodology | Agile Scrum |
+Nexa AI is a university-specific intelligent chatbot that lets IUB students ask natural-language questions about the IUB E-Portal and get precise, direct answers — without navigating through multiple portal pages.
+
+The system is built on a full **RAG pipeline**: university knowledge (scholarships, transport schedules, admission procedures, FAQs) is chunked, embedded, and stored in Pinecone. At runtime, the student's query is embedded, the most relevant chunks are retrieved, and a Groq-hosted LLM synthesizes a focused, contextual response — guided by a structured system prompt that ensures the LLM answers only what was asked.
+
+Developed as a Final Year Project at the Department of Computer Science, IUB — Session Fall 2022–2026.
 
 ---
 
-## 🏛️ System Architecture
+## Key features
+
+- 🎓 **Scholarship inquiry** — Lists available scholarships, eligibility criteria, and application procedures per query intent.
+- 🚌 **Transport assistance** — Bus routes, departure times, nearest alternatives, and pickup/drop points with route metadata.
+- 📋 **Admission guidance** — NAT registration, merit list process, required documents, and fee installment steps.
+- 💬 **General queries** — Departments, contact numbers, university personnel, library timings, WiFi, and E-portal help.
+- 🧠 **Intent-aware prompt** — Structured system prompt routes listing, yes/no, timing, procedure, and eligibility questions to the right response shape.
+- 📚 **RAG pipeline** — LangChain + Pinecone (MMR retrieval, k=3) with rich metadata tagging per chunk for filtered, precise retrieval.
+- ⚡ **Real-time responses** — Groq inference (Llama 3.3 70B Versatile) delivers sub-second LLM responses via the Groq API.
+- 🗄️ **SQLite fast-path** — Department contacts and hardcoded FAQs are served instantly from SQLite before hitting the RAG pipeline.
+
+---
+
+## Tech stack
+
+| Layer | Technology | Version / Notes |
+|---|---|---|
+| Frontend | HTML, CSS, JavaScript | Vanilla — no framework |
+| Backend | [Flask](https://flask.palletsprojects.com/) | 3.x · Python web framework |
+| GenAI Orchestration | [LangChain](https://docs.langchain.com/) | langchain-core, langchain-community, langchain-classic |
+| LLM | [Groq API](https://console.groq.com/docs) · [Llama 3.3 70B Versatile](https://huggingface.co/meta-llama/Llama-3.3-70B-Versatile) | langchain-groq · temperature=0 |
+| Vector Database | [Pinecone](https://docs.pinecone.io/) | langchain-pinecone · index: iub-chatbot · Dense · us-east-1 |
+| Embeddings | [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | langchain-huggingface · HuggingFaceEmbeddings · 384-dim |
+| Data Storage | SQLite3 | Departments · hardcoded FAQs · fast-path lookup |
+| Environment | python-dotenv | .env for API keys |
+| Dev Environment | Python venv · Git | Windows / PowerShell |
+
+---
+
+## System architecture
+
+Three-tier flow: the student's browser sends a POST request to Flask, which routes through a SQLite fast-path first, then falls through to the full LangChain RAG pipeline on Pinecone.
 
 ```
-┌──────────────────────────────────────────────────────────┐
-│                   User Interaction Layer                  │
-│         Web Interface (HTML / CSS / JavaScript)           │
-└─────────────────────────┬────────────────────────────────┘
-                          │ HTTP Request
-┌─────────────────────────▼────────────────────────────────┐
-│                    Flask Backend                          │
-│              (Route Handler / Session Manager)            │
-└──────────┬──────────────────────────────┬────────────────┘
-           │                              │
-┌──────────▼──────────┐      ┌────────────▼───────────────┐
-│   NLP Processing    │      │    LangChain RAG Pipeline   │
-│  • Tokenizer        │◄────►│  • Query Embedding          │
-│  • Intent Detector  │      │  • Pinecone Vector Search   │
-│  • Entity Extractor │      │  • Context Retrieval        │
-└──────────┬──────────┘      └────────────┬───────────────┘
-           │                              │
-┌──────────▼──────────────────────────────▼───────────────┐
-│                  Response Generator                       │
-│         (ML Models + Retrieved Context Fusion)            │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-┌──────────────────────────▼──────────────────────────────┐
-│                      Data Layer                           │
-│   Knowledge Base │ Pinecone Index │ Config / FAQs Files  │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│            Student browser                   │
+│         (HTML / CSS / JavaScript)            │
+└──────────────────┬──────────────────────────┘
+                   │ POST /get_response
+┌──────────────────▼──────────────────────────┐
+│           Flask route handler                │
+└──────────┬───────────────────┬──────────────┘
+           │ keyword match     │ fallthrough
+┌──────────▼──────────┐  ┌────▼─────────────────────────┐
+│  SQLite fast-path   │  │  LangChain RetrievalQA        │
+│  Depts · FAQs       │  │  chain_type=stuff · MMR k=3   │
+└─────────────────────┘  └────┬──────────────┬───────────┘
+                              │ embed query  │ generate
+                    ┌─────────▼──────┐  ┌────▼──────────────┐
+                    │    Pinecone    │  │    Groq API        │
+                    │  iub-chatbot   │  │  Llama 3.3 70B     │
+                    │  Dense 384-dim │  │  temp=0            │
+                    └────────────────┘  └───────────────────┘
+                         ▲
+              ┌──────────┴──────────┐
+              │ HuggingFace Embeds  │
+              │  all-MiniLM-L6-v2  │
+              └─────────────────────┘
 ```
 
 ---
 
-## 🧬 GenAI Pipeline
+## GenAI & RAG pipeline
 
-Nexa-AI uses a full **Retrieval-Augmented Generation (RAG)** pipeline powered by LangChain and Pinecone. Here's how data flows:
+Nexa AI uses a full Retrieval-Augmented Generation pipeline. Here is how data flows from raw university content to a student answer.
 
-### 1. 📄 Document Ingestion & Chunking
-University data (scholarships, transport, admissions, FAQs) is loaded and split into semantic chunks using LangChain's `RecursiveCharacterTextSplitter`.
+### 1. Document ingestion & chunking
+University data (scholarships, transport schedule, admissions, FAQs) is structured into QA-pair chunks. Each chunk is formatted as `Q: {question}\n\nA: {answer}` so the embedding captures both the user query signal and the answer content. Data is pre-structured into meaningful semantic units to avoid mid-answer splits.
+
+### 2. Metadata tagging
+Each chunk is enriched with structured metadata before indexing: `source`, `type` (faq / transport), `category` (scholarship / admission / hostel / academics / transport / library / general), `tags` (comma-separated keywords), `question` (original Q for citation display), and a deterministic `chunk_id` (UUID5) to prevent duplicate upserts.
+
+### 3. Embedding & indexing into Pinecone
+Chunks are embedded using [all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) (384-dimensional dense vectors) via `HuggingFaceEmbeddings` from [langchain-huggingface](https://python.langchain.com/docs/integrations/text_embedding/huggingfacehub). Vectors plus metadata are upserted into the `iub-chatbot` Pinecone index (Dense, us-east-1) using [langchain-pinecone](https://python.langchain.com/docs/integrations/vectorstores/pinecone/).
+
+### 4. Query retrieval (MMR)
+At runtime the user's message is embedded with the same model. The retriever uses **Maximal Marginal Relevance (MMR)** with `k=3` to return the most relevant non-redundant chunks. MMR balances similarity to the query with diversity of results, preventing three near-identical chunks from flooding the context.
 
 ```python
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-
-splitter = RecursiveCharacterTextSplitter(
-    chunk_size=500,
-    chunk_overlap=50
+retriever = vectorstore.as_retriever(
+    search_type="mmr",
+    search_kwargs={"k": 3}
 )
-chunks = splitter.split_documents(documents)
 ```
 
-### 2. 🏷️ Metadata Tagging
-Each chunk is enriched with metadata for precise filtering during retrieval.
+### 5. Response generation (Groq + Llama 3.3 70B)
+Retrieved chunks are injected into a structured `PromptTemplate` alongside the student's question. The prompt contains intent-routing rules that tell the LLM to answer only what was asked — list queries return only names, yes/no queries start with YES/NO, timing queries suggest nearest alternatives if no exact match. The LLM is served via [Groq](https://console.groq.com/) with `temperature=0` for deterministic answers.
 
-```python
-for chunk in chunks:
-    chunk.metadata = {
-        "source": "iub_scholarships.pdf",
-        "category": "scholarship",
-        "page": 3,
-        "university": "IUB"
-    }
+### 6. SQLite fast-path (pre-RAG)
+Before hitting the RAG pipeline, the Flask route does a keyword match against department names and static FAQs stored in SQLite. Matched queries return instantly without an LLM call — saving latency and Groq API tokens for simple lookups like "accounts department contact number".
+
+---
+
+## RAG pipeline diagram
+
 ```
-
-### 3. 🗂️ Indexing into Pinecone
-Chunks are embedded and stored in a Pinecone vector index for semantic search.
-
-``` python
-from langchain. vectorstores import Pinecone
-from langchain. embeddings import SentenceTransformerEmbeddings
-
-embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-vectorstore = Pinecone.from_documents(chunks, embeddings, index_name="nexa-ai-index")
-```
-
-### 4. 🔍 Query & Retrieval
-At runtime, the user's query is embedded and matched against the Pinecone index to retrieve the most relevant chunks.
-
-```python
-retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
-relevant_docs = retriever.get_relevant_documents(user_query)
-```
-
-### 5. 💬 Response Generation
-Retrieved context is passed to the ML/NLP response generator to produce a final, grounded answer.
-
-```python
-from langchain.chains import RetrievalQA
-
-qa_chain = RetrievalQA.from_chain_type(
-    llm=llm,
-    retriever=retriever,
-    return_source_documents=True
-)
-response = qa_chain({"query": user_query})
+┌──────────┐    ┌──────────────┐    ┌────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│ Student  │───▶│    Embed     │───▶│    Pinecone    │───▶│     Prompt      │───▶│    Groq LLM     │
+│  query   │    │ MiniLM-L6-v2│    │  MMR · k=3     │    │ context+question│    │  Llama 3.3 70B  │
+└──────────┘    └──────────────┘    └────────────────┘    └─────────────────┘    └────────┬────────┘
+     ▲                                      ▲                                              │
+     └──────────────────────────────────────┼──────────────────────────────────────────────┘
+                                            │              focused answer
+                              ┌─────────────┴──────────────────────────────────┐
+                              │  Scholarships · Transport · Admissions · FAQs  │
+                              └────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📁 Project Structure
+## Project structure
 
 ```
-nexa-ai/
-│
-├── frontend/
-│   ├── index.html
+Nexa-AI/
+├── app.py                            # Flask entry point · routes · QA chain · SQLite fast-path
+├── pinecone_data_upload_script.py    # FAQ chunking · metadata tagging · Pinecone upsert
+├── templates/
+│   └── index.html                   # Chat UI
+├── static/
 │   ├── style.css
 │   └── script.js
-│
-├── backend/
-│   ├── app.py                  # Flask entry point
-│   ├── routes.py               # API routes
-│   ├── session_manager.py      # Conversation context handling
-│   └── response_router.py      # Intent → response routing
-│
-├── nlp/
-│   ├── intent_classifier.py    # ML-based intent detection
-│   ├── tokenizer.py            # Text preprocessing
-│   ├── entity_extractor.py     # NER for query understanding
-│   └── nlp_pipeline.py         # Full NLP workflow
-│
-├── genai/
-│   ├── chunker.py              # Document chunking logic
-│   ├── metadata_tagger.py      # Metadata enrichment
-│   ├── indexer.py              # Pinecone indexing
-│   ├── retriever.py            # Vector search & retrieval
-│   └── rag_chain.py            # LangChain RAG pipeline
-│
-├── data/
-│   ├── scholarships.json
-│   ├── transportation.json
-│   ├── admissions.json
-│   └── general_faqs.json
-│
-├── models/
-│   ├── intent_model.pkl        # Trained intent classifier
-│   └── config.json             # Model hyperparameters
-│
-├── docs/
-│   ├── SRS_Document_of_Nexa_AI.pdf
-│   └── SDD_of_Nexa_AI.pdf
-│
-├── .env.example
-├── requirements.txt
+├── university.db                    # SQLite — departments · static FAQs (auto-created)
+├── .env                             # API keys (not committed)
+├── .env.example                     # Template for env vars
+├── requirements.txt                 # Pinned dependencies
 └── README.md
 ```
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Python 3.10+
-- pip
-- Pinecone account (free tier works)
-- Git
-
-### Installation
+## Getting started
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/nexa-ai.git
-cd nexa-ai
+git clone https://github.com/AdilFaraz-ML/Nexa-AI.git
+cd Nexa-AI
 
 # 2. Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate        # On Windows: venv\Scripts\activate
+venv\Scripts\activate          # Windows PowerShell
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
 # 4. Set up environment variables
 cp .env.example .env
-# Fill in your Pinecone API key and other config in .env
+# Fill in PINECONE_API_KEY and GROQ_API_KEY in .env
 
-# 5. Index your data into Pinecone (run once)
-python genai/indexer.py
+# 5. Upload knowledge data to Pinecone (run once)
+python pinecone_data_upload_script.py
 
-# 6. Run the Flask backend
-python backend/app.py
+# 6. Start the Flask app
+python app.py
 ```
 
-Open your browser and go to `http://localhost:5000`
+Open `http://localhost:5000` in your browser.
 
 ---
 
-## 🔐 Environment Variables
+## Environment variables
 
-Create a `.env` file in the root directory:
-
-```env
-PINECONE_API_KEY=your_pinecone_api_key_here
-PINECONE_ENVIRONMENT=your_pinecone_environment
-PINECONE_INDEX_NAME=nexa-ai-index
-FLASK_SECRET_KEY=your_flask_secret_key
-FLASK_DEBUG=True
-EMBEDDING_MODEL=all-MiniLM-L6-v2
-```
-
----
-
-## 💡 Usage
-
-Once the app is running, open the web interface. You can ask questions like:
-
-| Example Query | Domain |
+| Variable | Description |
 |---|---|
-| `What scholarships are available for BS students?` | Scholarship |
-| `What are the bus timings for One Unit stop?` | Transportation |
-| `How do I apply for the NAT entrance test?` | Admission |
-| `What is the contact number of the Admissions office?` | General |
-| `Where can I find my transcript on the portal?` | E-Portal Navigation |
+| `PINECONE_API_KEY` | Your Pinecone project API key |
+| `GROQ_API_KEY` | Groq Console API key for Llama 3.3 70B |
+
+The Pinecone index name (`iub-chatbot`) and embedding model (`all-MiniLM-L6-v2`) are hardcoded in `app.py`. Update them there if you change either.
 
 ---
 
-## ✅ Functional Requirements
+## Functional requirements
 
 | ID | Feature | Status |
 |---|---|---|
-| FR-1 | Scholarship Inquiry Handling | ✅ Implemented |
-| FR-2 | Transportation Information Assistance | ✅ Implemented |
-| FR-3 | Admission Guidance & Support | ✅ Implemented |
-| FR-4 | General Query Handling | ✅ Implemented |
-| FR-5 | E-Portal Page Navigation Links | ✅ Implemented |
-| FR-6 | Real-Time Output Display | ✅ Implemented |
-| FR-7 | Conversation Context Maintenance | ✅ Implemented |
+| FR-1 | Scholarship inquiry — list, eligibility, application procedure per query intent | ✅ Implemented |
+| FR-2 | Transport assistance — route timings, nearest alternative if no exact match | ✅ Implemented |
+| FR-3 | Admission guidance — NAT, merit list, documents, fee installment | ✅ Implemented |
+| FR-4 | General queries — library, WiFi, student card, LMS, contact numbers | ✅ Implemented |
+| FR-5 | Intent-aware response shaping via structured system prompt | ✅ Implemented |
+| FR-6 | Real-time output with sub-second Groq inference | ✅ Implemented |
+| FR-7 | SQLite fast-path for department contacts and static FAQs | ✅ Implemented |
 
 ---
 
-## 📊 Non-Functional Requirements
+## Current limitations
 
-| Requirement | Target |
-|---|---|
-| Response Time | ≤ 2 seconds under normal load |
-| Query Success Rate | ≥ 99% without failure |
-| Availability | 24/7 uptime |
-| Security | HTTPS, no permanent storage of user data |
-| Maintainability | Modular architecture, full documentation |
+- Text-based input only — no voice support
+- English language only — no Urdu or multilingual support
+- No live connection to the IUB E-Portal database — data is static and manually curated
+- Response accuracy depends on completeness of the indexed knowledge base
+- No user session or conversation memory — each query is stateless
 
 ---
 
-## ⚠️ Current Limitations
+## Future enhancements
 
-- Text-based input only (no voice support yet)
-- English language only (no multilingual support yet)
-- No live connection to the IUB E-Portal database (integration pending approval)
-- Covers 4 domains: Scholarships, Transportation, Admissions, General Queries
-- Response accuracy depends entirely on the completeness of the training dataset
-- No external LLM API integrated — responses are grounded solely in the local knowledge base
-
----
-
-## 🔮 Future Enhancements
-
-- [ ] Voice command input support
-- [ ] Multilingual support (Urdu and other languages)
-- [ ] Live integration with IUB E-Portal database (once approved)
-- [ ] Admin panel for updating the knowledge base without redeployment
-- [ ] Personalized responses based on student profile (BS / MPhil / PhD)
-- [ ] Mobile app version
+- Urdu language support
+- Voice command input via Web Speech API
+- Live integration with IUB E-Portal database (pending university approval)
+- Conversation memory for multi-turn context
+- Admin panel for updating the knowledge base without redeployment
+- Personalized responses based on student level (BS / MPhil / PhD)
+- Mobile app version
 
 ---
 
-## 👨‍💻 Author
+## Author & supervisor
 
-**Adil Faraz**  
-BS Computer Science — Session Fall 2022–2026  
-Department of Computer Science  
-The Islamia University of Bahawalpur
+**Author — Adil Faraz**
+BS Computer Science — Session Fall 2022–2026
+Department of Computer Science, The Islamia University of Bahawalpur
+[github.com/AdilFaraz-ML](https://github.com/AdilFaraz-ML) · [LinkedIn](https://linkedin.com/in/adil-faraz-b3407a271)
 
----
-
-## 👨‍🏫 Supervisor
-
-**Dr. Muhammad Omar**  
-Department of Computer Science & IT  
-The Islamia University of Bahawalpur
+**Supervisor — Dr. Muhammad Omar**
+Department of Computer Science & IT, The Islamia University of Bahawalpur
 
 ---
 
-## 📚 References
+## References
 
-1. Schwaber, Ken; Beedle, Mike. *Agile Software Development with Scrum*. 1st ed., Pearson, 2001. ISBN 9780130676344.
-2. Staffordshire University. *Beacon: Your digital guide*. Retrieved November 23, 2025, from https://www.staffs.ac.uk/students/digital-services/beacon
-3. LangChain Documentation. https://docs.langchain.com
-4. Pinecone Documentation. https://docs.pinecone.io
+1. [LangChain Documentation](https://docs.langchain.com/) — GenAI orchestration framework
+2. [Pinecone Documentation](https://docs.pinecone.io/) — Vector database and similarity search
+3. [Groq API Documentation](https://console.groq.com/docs) — LLM inference platform
+4. [all-MiniLM-L6-v2 on HuggingFace](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) — Sentence embedding model
+5. [Flask Documentation](https://flask.palletsprojects.com/) — Python web framework
+6. Lewis, P. et al. (2020). Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. *NeurIPS 2020.*
+7. Schwaber, K.; Beedle, M. *Agile Software Development with Scrum.* Pearson, 2001.
 
 ---
 
-<p align="center">Made with ❤️ for IUB Students — Nexa-AI © 2026</p>
+*Made for IUB students — Nexa AI © 2026*
+```
