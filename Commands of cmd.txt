@@ -1,0 +1,16 @@
+# 1️⃣ Switch to D: drive
+D:
+
+# 2️⃣ Move into your Flask project folder
+cd "Final Year Project\Chatbot"
+
+# 3️⃣ Activate your virtual environment
+venv\Scripts\activate
+
+# 4️⃣ Run your Flask app
+python app.py
+
+
+#  When new index of data is uploaded run this
+
+python vector_db.py

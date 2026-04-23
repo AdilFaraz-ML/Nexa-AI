@@ -1,4 +1,4 @@
-/* Base colors and sizes */
+/* ── Base Reset ──────────────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -6,11 +6,11 @@
 }
 
 :root {
-  --brand:       #2b357c;
-  --brand-dark:  #1d2558;
-  --accent:      #e5ac39;
-  --white:       #ffffff;
-  --text-muted:  rgba(255, 255, 255, 0.70);
+  --brand:      #2b357c;
+  --brand-dark: #1d2558;
+  --accent:     #e5ac39;
+  --white:      #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.70);
 }
 
 html {
@@ -25,7 +25,7 @@ body {
 }
 
 
-/*Global Header*/
+/* ── Global Header ───────────────────────────────────────────────────────── */
 .global-header {
   position: sticky;
   top: 0;
@@ -45,7 +45,6 @@ body {
   justify-content: space-between;
 }
 
-/* Logo + Name */
 .header-brand {
   display: flex;
   align-items: center;
@@ -56,7 +55,6 @@ body {
 .header-brand img {
   height: 38px;
   width: auto;
-  filter: remove;
 }
 
 .header-brand span {
@@ -66,7 +64,6 @@ body {
   letter-spacing: 0.4px;
 }
 
-/* Navbar links */
 .header-nav {
   display: flex;
   gap: 2rem;
@@ -94,83 +91,86 @@ body {
   transition: width 0.25s ease;
 }
 
-.header-nav a:hover {
-  color: var(--accent);
-}
-
-.header-nav a:hover::after {
-  width: 100%;
-}
+.header-nav a:hover { color: var(--accent); }
+.header-nav a:hover::after { width: 100%; }
 
 
-/*Chatbot Section*/
+/* ── Chatbot Section ─────────────────────────────────────────────────────── */
 .chatbot-section {
   position: relative;
   min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url("Background_image.jpg");
+  overflow: hidden;
+}
+
+/* ── Background Slideshow ────────────────────────────────────────────────── */
+/*
+  4 slides, each visible for 5s, crossfade takes 2s.
+  Total cycle = 4 × 5s = 20s.
+  Each slide:  fades in at 0%, holds until its turn ends, fades out.
+
+  Timeline per slide (percentage of 20s):
+    slide-1:  0–25%   → starts at 0s
+    slide-2: 25–50%   → starts at 5s  (20s × 25% = 5s)
+    slide-3: 50–75%   → starts at 10s
+    slide-4: 75–100%  → starts at 15s
+*/
+
+.bg-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.bg-slide {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-attachment: fixed;
-  overflow: hidden;
+  opacity: 0;
+  animation: bgFade 20s infinite;
 }
 
-/* dark overlay — scoped to the section */
-.chatbot-section::before {
-  content: "";
+/* Each slide is delayed by 5s from the previous */
+.slide-1 { background-image: url("Background_image.jpg");       animation-delay: 0s;  }
+.slide-2 { background-image: url("abbasia campus.jpg");          animation-delay: 5s;  }
+.slide-3 { background-image: url("abbasia campus old.jpg");      animation-delay: 10s; }
+.slide-4 { background-image: url("BJC campus.jpg");              animation-delay: 15s; }
+
+@keyframes bgFade {
+  /*  0%  — invisible, about to appear        */
+  /*  10% — fully visible (2s fade in)        */
+  /*  25% — still fully visible (hold)        */
+  /*  35% — fading out (2s fade out)          */
+  /*  100%— invisible until next cycle        */
+  0%   { opacity: 0; }
+  10%  { opacity: 1; }
+  25%  { opacity: 1; }
+  35%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+/* Dark overlay on top of slideshow */
+.bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(77, 79, 150, 0.4);
-  z-index: 0;
+  background: rgba(29, 37, 88, 0.55);
+  z-index: 1;
 }
 
-/*Background animations*/
-.background {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-  z-index: 0;
-}
 
-.rect {
-  position: absolute;
-  width: 80px;
-  height: 220px;
-  opacity: 0.18;
-  transform: rotate(-45deg);
-  animation: moveDiagonal 8s linear infinite;
-}
-
-@keyframes moveDiagonal {
-  0%   { top: -250px; right: -250px; }
-  100% { top: 120%;   right: 120%;   }
-}
-
-.white  { background: white; }
-.blue   { background: #1d2558; opacity: 0.25; }
-.yellow { background: #e5ac39; opacity: 0.25; }
-
-.lane1 { right: 0%;  animation-delay: 0s;   }
-.lane2 { right: 15%; animation-delay: 1.5s; }
-.lane3 { right: 30%; animation-delay: 3s;   }
-.lane4 { right: 45%; animation-delay: 4.5s; }
-.lane5 { right: 60%; animation-delay: 6s;   }
-
-/*Chatbot card */
+/* ── Chatbot Card ────────────────────────────────────────────────────────── */
 .chatbot-container {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   width: 380px;
   border-radius: 10px;
   background-color: #ffffff;
-  border: 2px solid #2b357c; /* thinner but cleaner */
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* makes it pop */
+  border: 2px solid #2b357c;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -248,9 +248,7 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-#user-input:focus {
-  border-color: #2b357c;
-}
+#user-input:focus { border-color: #2b357c; }
 
 .send-btn {
   position: absolute;
@@ -270,12 +268,10 @@ body {
   transition: 0.2s ease;
 }
 
-.send-btn:hover {
-  background: #1d2558;
-}
+.send-btn:hover { background: #1d2558; }
 
 
-/*FAQ's Section*/
+/* ── FAQ Section ─────────────────────────────────────────────────────────── */
 .faq-section {
   background: #f0f2f8;
   padding: 5rem 2rem;
@@ -339,9 +335,7 @@ body {
   transition: color 0.2s;
 }
 
-.faq-question:hover {
-  color: var(--brand);
-}
+.faq-question:hover { color: var(--brand); }
 
 .faq-icon {
   font-style: normal;
@@ -361,8 +355,19 @@ body {
 }
 
 .faq-item.open .faq-answer {
-  max-height: 200px;
+  max-height: 600px;
   padding-top: 0.55rem;
+}
+
+.faq-answer ol {
+  list-style: decimal;
+  padding-left: 1.3rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.faq-answer ol li {
+  margin-bottom: 0.3rem;
 }
 
 .faq-item.open .faq-icon {
@@ -370,7 +375,7 @@ body {
 }
 
 
-/*Global Footer */
+/* ── Global Footer ───────────────────────────────────────────────────────── */
 .global-footer {
   width: 100%;
   background-color: var(--brand-dark);
@@ -399,9 +404,7 @@ body {
   transition: color 0.2s;
 }
 
-.footer-links a:hover {
-  color: var(--accent);
-}
+.footer-links a:hover { color: var(--accent); }
 
 .footer-copy {
   font-size: 0.78rem;
@@ -409,7 +412,7 @@ body {
 }
 
 
-/*Responsive on mobile and tab*/
+/* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .faq-grid {
     grid-template-columns: 1fr;
@@ -424,7 +427,8 @@ body {
     width: 95vw;
     margin: 30px auto;
   }
-   .footer-copy {
+
+  .footer-copy {
     text-align: center;
   }
 }

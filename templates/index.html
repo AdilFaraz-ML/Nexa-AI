@@ -11,8 +11,7 @@
 </head>
 <body>
 
-  <!-- Global Header-->
-   
+  <!-- ══ Global Header ══ -->
   <header class="global-header">
     <div class="header-inner">
       <a href="#chatbot" class="header-brand">
@@ -22,6 +21,7 @@
       <nav class="header-nav">
         <a href="#chatbot">Chatbot</a>
         <a href="#faqs">FAQ's</a>
+        <a href="https://www.iub.edu.pk" target="_blank" rel="noopener">IUB Website</a>
       </nav>
     </div>
   </header>
@@ -29,12 +29,16 @@
   <!-- ══ Chatbot Section ══ -->
   <section id="chatbot" class="chatbot-section">
 
-    <div class="background">
-      <div class="rect white lane1"></div>
-      <div class="rect white lane2"></div>
-      <div class="rect blue lane4"></div>
-      <div class="rect yellow lane5"></div>
+    <!-- Background slideshow (4 images, CSS crossfade) -->
+    <div class="bg-slideshow">
+      <div class="bg-slide slide-1"></div>
+      <div class="bg-slide slide-2"></div>
+      <div class="bg-slide slide-3"></div>
+      <div class="bg-slide slide-4"></div>
     </div>
+
+    <!-- Dark overlay -->
+    <div class="bg-overlay"></div>
 
     <div class="chatbot-container">
       <div class="chatbot-header">
@@ -59,101 +63,434 @@
 
   </section>
 
-  <!-- ══ FAQ's Section ══ -->
+  <!-- ══ FAQ Section ══ -->
   <section id="faqs" class="faq-section">
-    
+
     <h2 class="section-title">Frequently Asked Questions</h2>
     <p class="section-desc">Everything you need to know about IUB and Nexa AI. Can't find an answer? Chat with the bot above.</p>
 
     <div class="faq-grid">
 
+      <!-- ── Left Column ── -->
       <div class="faq-col">
+
         <div class="faq-item">
           <div class="faq-question">What is Nexa AI? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Nexa AI is the official AI-powered chatbot of Islamia University of Bahawalpur (IUB). It answers queries about transport, departments, contacts, admissions, and more.</div>
+          <div class="faq-answer">
+            Nexa AI is the AI-powered chatbot of Islamia University of Bahawalpur (IUB).
+            It answers queries about transport, scholarships, admissions, general queries, and more.
+            It is developed by Adil Faraz as a Final Year Project (FYP) at IUB.
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">How do I use the chatbot? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Simply type your question in the chat input and press Enter or click the send button. The bot will reply instantly.</div>
+          <div class="faq-question">How can I obtain a library card? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To obtain a library card at The Islamia University of Bahawalpur (IUB), you are required
+            to visit the Sir Sadiq Library in person. You must present your official student ID card
+            for registration. After completing the registration process, a library card will be issued
+            to you. This card allows you to access both digital and physical library resources. Please
+            note that in case of loss or damage to any borrowed book, you will be required to compensate
+            for it in accordance with the university's library policies.
+          </div>
         </div>
+
         <div class="faq-item">
           <div class="faq-question">What are the university transport timings? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Afternoon transport services start from 12:00 PM onwards on all major university routes, effective from 03 December 2025.</div>
+          <div class="faq-answer">
+            The university transport service operates according to the following schedule:
+            <ol>
+              <li>Buses run from 7:30 AM to 6:30 PM.</li>
+              <li>Buses typically arrive at intervals of 30 minutes to 1 hour.</li>
+              <li>These timings may vary during examination periods.</li>
+            </ol>
+          </div>
         </div>
+
         <div class="faq-item">
           <div class="faq-question">How can I contact IUB administration? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">You can contact IUB at +92-62-9250235 or visit the main campus at Bahawalpur. The chatbot can also direct you to the relevant department.</div>
+          <div class="faq-answer">
+            You can contact IUB at +92-62-9250235 or visit the main campus at Bahawalpur.
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">Is admissions information available on Nexa AI? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Yes! Ask the chatbot about current admissions, eligibility criteria, and deadlines. You can also visit the IUB official website for the latest notifications.</div>
+          <div class="faq-question">Which documents are required for admission? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            For admission to IUB, you are required to submit the following documents:
+            <ol>
+              <li>Verified result cards of Matric (10th) and Intermediate (12th).</li>
+              <li>CNIC or B-Form.</li>
+              <li>Recent passport-size photographs.</li>
+              <li>Any additional documents (if required by the university).</li>
+            </ol>
+            All documents must be submitted along with an affidavit at the IUB Old Campus for
+            verification purposes.
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">What departments does IUB have? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">IUB has departments covering Sciences, Arts, Engineering, Commerce, Islamic Studies, Law, and more. Ask the chatbot for contact details of any specific department.</div>
+          <div class="faq-question">How can I download my transcript? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To download your transcript, follow these steps:
+            <ol>
+              <li>Sign in to your My-IUB account.</li>
+              <li>On the homepage, navigate to the Transcript tab.</li>
+              <li>Click on the Download PDF button to download your transcript.</li>
+            </ol>
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">Can Nexa AI help with exam schedules? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Yes, Nexa AI can provide information about exam schedules if that data has been loaded into its knowledge base.</div>
+          <div class="faq-question">What is LMS? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            The Learning Management System (LMS) is an online platform provided by IUB through its
+            E-portal. It is used by instructors to upload lectures, assignments, and course materials.
+            Students are required to submit their assignments through this platform within the given
+            deadlines. LMS can be accessed through the My-IUB portal.
+          </div>
         </div>
+
         <div class="faq-item">
           <div class="faq-question">Does Nexa AI work 24/7? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Yes, Nexa AI is available around the clock. For urgent administrative matters, we recommend contacting university staff directly during office hours.</div>
+          <div class="faq-answer">
+            Yes, Nexa AI is available around the clock. For urgent administrative matters, we recommend
+            contacting university staff directly during office hours.
+          </div>
         </div>
+
         <div class="faq-item">
           <div class="faq-question">Which campuses does IUB have? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">IUB operates multiple campuses including Baghdad-ul-Jadeed, Abbasia Campus, Khawaja Fareed Campus, and Rahim Yar Khan Campus.</div>
+          <div class="faq-answer">
+            IUB operates multiple campuses including Baghdad-ul-Jadeed, Abbasia Campus,
+            Khawaja Fareed Campus, and Rahim Yar Khan Campus.
+          </div>
         </div>
-        <div class="faq-item">
-          <div class="faq-question">What language does the chatbot support? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Currently Nexa AI primarily supports English. Urdu language support may be added in future updates.</div>
-        </div>
-      </div>
 
+        <div class="faq-item">
+          <div class="faq-question">How can I download my student card? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To download your student card, follow these steps:
+            <ol>
+              <li>Log in to your My-IUB account.</li>
+              <li>Navigate to the My Student Card tab.</li>
+              <li>Click on the option to download your student card.</li>
+            </ol>
+            If you encounter any issues, you are advised to contact the IT Department of IUB for assistance.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How to create an account on the IUB E-portal? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To create an account on the IUB E-portal, follow these steps:
+            <ol>
+              <li>Open your browser and search for <strong>IUB E-portal</strong>.</li>
+              <li>Open the official portal website.</li>
+              <li>Fill in the required information: Full Name, CNIC, Address, Educational details, Contact information, and any other requested details.</li>
+              <li>Submit the registration form to create your account.</li>
+              <li>Once registered, sign in again using your credentials.</li>
+              <li>You can now apply for the NAT (National Aptitude Test) through the portal.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How to apply for university hostel? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            The hostel application process differs based on your current semester:
+            <br><br>
+            <strong>1st Semester Students:</strong>
+            <ol>
+              <li>Visit the Abbasia Campus at the time of your admission.</li>
+              <li>Apply for hostel accommodation from the Admission Department.</li>
+              <li>Prepare and submit: paid fee challan of Rs. 20,000 (per semester), attested affidavit, and CNIC copy.</li>
+              <li>Upload all required documents on the IUB E-portal.</li>
+            </ol>
+            <strong>2nd Semester or Above:</strong>
+            <ol>
+              <li>Visit the Executive Hostel at Baghdad-ul-Jadeed (BJC) Campus in person.</li>
+              <li>Submit a physical application along with: paid fee challan of Rs. 20,000 (per semester), attested affidavit, and CNIC copy.</li>
+              <li>Upload all required documents on the IUB E-portal.</li>
+              <li>Accommodation will be allotted subject to availability.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How to apply for a scholarship from the portal? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To apply for a scholarship through the IUB E-portal, follow these steps:
+            <ol>
+              <li>Sign in to your My-IUB account.</li>
+              <li>Navigate to the <strong>Scholarship</strong> tab from the menu.</li>
+              <li>Fill in the required information and upload the necessary documents.</li>
+              <li>Submit your application.</li>
+            </ol>
+            If shortlisted, the department will publish a list of selected candidates. You may be
+            called for an interview, after which scholarships are awarded at varying percentages
+            (e.g., 30%, 70%, or 100%). If awarded, the scholarship amount will reflect on your
+            portal and will be deducted from your fee challan in the following semester.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">Which scholarships are available for BS students? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            <strong>Departmental Scholarships (Faculty of Computing):</strong>
+            <ol>
+              <li>Needy Fee Remission</li>
+              <li>Kinship (for students whose sibling is currently enrolled at IUB)</li>
+              <li>Hafiz-e-Quran</li>
+              <li>Position Holder</li>
+              <li>Orphan</li>
+            </ol>
+            <strong>External Scholarships:</strong>
+            <ol>
+              <li>EHSAAS / BISP Scholarship <em>(HEC &amp; BISP)</em></li>
+              <li>HEC Need-Based Scholarship <em>(HEC)</em></li>
+              <li>PEEF Scholarship <em>(Punjab Government)</em></li>
+              <li>HEC-USAID MNBSP <em>(HEC)</em></li>
+              <li>NEST — National Endowment Scholarship for Talented <em>(Ministry of Planning)</em></li>
+              <li>Pakistan Scottish Scholarships Scheme <em>(British Council)</em></li>
+              <li>Diya Scholarship <em>(Private)</em></li>
+              <li>Rehmat-ul-lil-Alameen <em>(Punjab Government)</em></li>
+              <li>Karwan-e-Ilm Scholarship <em>(Private)</em></li>
+              <li>Gilgit Baltistan (GB) Scholarship <em>(HEC)</em></li>
+              <li>Honhaar Scholarship <em>(PHEC)</em></li>
+            </ol>
+          </div>
+        </div>
+
+      </div><!-- /faq-col left -->
+
+      <!-- ── Right Column ── -->
       <div class="faq-col">
+
         <div class="faq-item">
-          <div class="faq-question">How does Nexa AI find answers? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Nexa AI uses a RAG pipeline powered by LangChain and Pinecone to search a university knowledge base and generate accurate responses.</div>
+          <div class="faq-question">How can I apply for course repeat or improvement? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To apply for a course repeat or improvement, follow these steps:
+            <ol>
+              <li>Log in to your My-IUB account.</li>
+              <li>Navigate to the Course Repeat Challan tab.</li>
+              <li>Select either Course Repeat or Course Improvement.</li>
+              <li>Choose the subject(s) from your semester list.</li>
+              <li>Download the fee challan.</li>
+              <li>Pay the required fee.</li>
+              <li>Submit the paid challan copy to the relevant clerk.</li>
+            </ol>
+            After submission, you will be assigned to a class for the selected course. Please note
+            that the fee for course repeat is generally higher than the fee for course improvement.
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">Is my chat data stored? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Conversations may be logged for quality improvement purposes. No personally identifiable information is shared with third parties.</div>
+          <div class="faq-question">Is full fee payment required after selection in the merit list? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            Yes, once your name appears in the IUB merit list, you are required to pay the full
+            admission fee initially. Afterward, semester fees may be paid in two installments,
+            subject to university policy.
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">What if the bot gives a wrong answer? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">If you receive an incorrect answer, please contact the relevant university department directly. You can also report the issue to the development team.</div>
+          <div class="faq-question">How can I apply for fee installment payment? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To apply for fee installment, follow these steps:
+            <ol>
+              <li>Log in to your My-IUB account.</li>
+              <li>Navigate to the Financial Voucher tab.</li>
+              <li>Select the challan for which you want to apply for installments.</li>
+              <li>Click on the Installment Option (usually highlighted in orange).</li>
+              <li>Submit your request.</li>
+            </ol>
+            Please note that this facility is available for a limited time each semester.
+          </div>
         </div>
+
         <div class="faq-item">
-          <div class="faq-question">How do I find my department's contact? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Ask the chatbot something like "What is the contact number for the Computer Science department?" and it will retrieve the relevant details.</div>
+          <div class="faq-question">Who is the Vice Chancellor of IUB? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            Dr. Muhammad Kamran is the current Vice Chancellor of The Islamia University of Bahawalpur (IUB).
+            He can be contacted via email at: vc@iub.edu.pk
+          </div>
         </div>
-        <div class="faq-item">
-          <div class="faq-question">Can I ask about hostel facilities? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Yes, ask the chatbot about hostel availability, fees, and contacts. IUB provides separate hostels for male and female students across its campuses.</div>
-        </div>
+
         <div class="faq-item">
           <div class="faq-question">What are the library timings? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">The Central Library is generally open from 8:00 AM to 8:00 PM on weekdays. Ask the chatbot for the latest or specific campus library hours.</div>
+          <div class="faq-answer">
+            The Sir Sadiq Library is generally open from 9:00 AM to 5:00 PM on weekdays.
+          </div>
         </div>
-        <div class="faq-item">
-          <div class="faq-question">How can I apply to IUB? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Applications are submitted through the IUB admissions portal. The chatbot can guide you to the correct URL and explain required documents.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">Is there a fee structure available? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Yes, you can ask the chatbot about semester fees for various programs. Official fee structures are also posted on the IUB website each academic year.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">Can I get bus route details from the bot? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Absolutely. Ask about specific stops like BJC, AC, KH, or FC and Nexa AI will return the relevant transport route and timing information.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-question">Who built Nexa AI? <i class="faq-icon">+</i></div>
-          <div class="faq-answer">Nexa AI was developed as a Final Year Project (FYP) by an IUB Computer Science student using LangChain, Pinecone, Flask, and OpenAI APIs.</div>
-        </div>
-      </div>
 
-    </div>
+        <div class="faq-item">
+          <div class="faq-question">When are Spring and Fall admissions announced? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            The Islamia University of Bahawalpur (IUB) typically announces admissions as follows:
+            <ol>
+              <li>Fall Admissions: Announced in June/July (classes usually begin in October).</li>
+              <li>Spring Admissions: Announced in November/December (classes usually begin in January/February).</li>
+            </ol>
+            Applications are submitted online through the official IUB E-portal.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How many programs and departments are available at IUB for BS and MS? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            The Islamia University of Bahawalpur (IUB) offers a wide range of academic programs across
+            approximately 300 disciplines, delivered through 135 teaching departments. These programs
+            include undergraduate (BS), postgraduate (MS/MPhil), and PhD levels, covering fields such
+            as arts, sciences, engineering, and professional studies.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How can I apply for the National Aptitude Test (NAT)? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            To apply for the NAT, follow these steps:
+            <ol>
+              <li>Register on the IUB E-portal (if you do not already have an account).</li>
+              <li>Log in to your account.</li>
+              <li>Navigate to the NAT application section.</li>
+              <li>Fill out the required details.</li>
+              <li>Generate and download the test challan (approximately Rs. 1,000).</li>
+              <li>Pay the challan fee at the designated bank.</li>
+              <li>Upload the paid challan receipt on the portal.</li>
+            </ol>
+            After verification, you will be issued a roll number slip along with the test date.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">What should I do if someone is harassing me? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            If someone is harassing you via messages or phone calls, you can take the following steps:
+            <ol>
+              <li>Contact your Class Representative (CR).</li>
+              <li>Reach out directly to the Student Affairs Director (for female students, this is typically a female official).</li>
+              <li>Contact your department coordinator.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How to connect to WiFi in IUB? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            There are two ways to connect to WiFi in IUB:
+            <ol>
+              <li>
+                <strong>Students:</strong> Connect to the <em>IUB Smart University</em> WiFi network.
+                Enter your username as <em>rollno@iub.edu.pk</em> and your My-IUB password.
+              </li>
+              <li>
+                <strong>Guests:</strong> Connect to the <em>IUB Guest</em> WiFi network.
+                When prompted for a password, enter <em>IUB GUEST</em> (uppercase or lowercase both work).
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How to apply for a scholarship? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            The application procedure varies depending on the scholarship type:
+            <br><br>
+            <strong>Departmental Scholarships</strong> (Kinship, Needy Fee Remission, Orphan, Hafiz-e-Quran, Position Holder):
+            <ol>
+              <li>Collect and fill out the application form in hard copy.</li>
+              <li>Attach the required documents including an income certificate.</li>
+              <li>Submit the form in person to the designated scholarship coordinator in your department.</li>
+            </ol>
+            <strong>E-portal / HEC / Private Scholarships</strong> (Karwan-e-Ilm, Diya, Honhaar, PEEF):
+            <ol>
+              <li>Log in to your My-IUB account and navigate to the Scholarship section.</li>
+              <li>Fill in your personal details and upload the required documents.</li>
+              <li>If shortlisted, submit physical copies of your documents along with an application and income certificate (if required) to the department.</li>
+            </ol>
+            <strong>International Scholarships</strong> (US, UK, Scotland, etc.):
+            <ol>
+              <li>The department or official university social media will share the relevant application link.</li>
+              <li>Visit the provided link and complete the application on the respective scholarship website.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">What is the eligibility criteria for scholarships? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            <strong>Departmental Scholarships:</strong>
+            <ol>
+              <li><strong>Needy Fee Remission</strong> — Family income below Rs. 40,000 | Current semester paid challan | CNIC | Attested income certificate.</li>
+              <li><strong>Orphan</strong> — Father's death certificate | Current semester paid challan | CNIC.</li>
+              <li><strong>Kinship</strong> — Both siblings currently enrolled at IUB | 2 paid challan copies | 2 Matric degree copies | 2 CNIC copies.</li>
+              <li><strong>Hafiz-e-Quran</strong> — Sanad (Hafiz-e-Quran degree) | Current semester paid challan | CNIC.</li>
+              <li><strong>Position Holder</strong> — Next semester challan copy | Controller-signed transcript | CNIC.</li>
+            </ol>
+            <strong>External &amp; HEC Scholarships</strong> (income limits; documents may vary per policy):
+            <ol>
+              <li>EHSAAS / BISP Scholarship — Rs. 45,000</li>
+              <li>HEC Need-Based Scholarship — Rs. 60,000</li>
+              <li>PEEF (Bachelor &amp; Master Level) — Rs. 60,000</li>
+              <li>HEC-USAID MNBSP — Rs. 60,000</li>
+              <li>Rehmat-ul-lil-Alameen — Rs. 60,000</li>
+              <li>Honhaar Scholarship Phase-I — Rs. 3,50,000</li>
+              <li>NEST, Pakistan Scottish, Diya, Karwan-e-Ilm, GB Scholarship — As per current policy.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">How to apply for clearance (8th semester students)? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            Students who have completed all degree requirements must complete the clearance process
+            to receive their final result card or transcript.
+            <br><br>
+            <strong>Step 1 — Generate and Pay Challans:</strong>
+            <ol>
+              <li>Log in to the IUB E-portal and go to <strong>Generate Online Challan</strong>.</li>
+              <li>Search for <strong>"Alumni"</strong> and generate the Alumni Challan (Rs. 500).</li>
+              <li>Search for <strong>"Degree"</strong>, select <strong>Normal Degree Fee</strong>, and generate the challan (Rs. 5,000).</li>
+              <li>Pay both challans via HBL App, JazzCash, Women Bank, or any HBL branch.</li>
+            </ol>
+            <strong>Step 2 — Upload Documents &amp; Apply for Clearance:</strong>
+            <ol>
+              <li>Log in to your My-IUB portal and go to <strong>Menu → My Documents</strong>.</li>
+              <li>Upload scanned documents in JPG/PNG format.</li>
+              <li>From the same menu, go to <strong>My Clearance</strong> and click <strong>Apply for Clearance</strong>.</li>
+              <li>Enter remarks as <strong>"Degree Completed"</strong> and submit.</li>
+              <li>Wait 24–48 hours for IT Department verification.</li>
+            </ol>
+            <strong>Step 3 — Obtain Physical Signatures (in this order):</strong>
+            <ol>
+              <li>Library Office</li>
+              <li>Security Office (Main Gate)</li>
+              <li>Alumni Office (Taabish Alwari Building)</li>
+              <li>Chairman (Department Office)</li>
+              <li>Accounts Branch (Old / Abbasia Campus)</li>
+            </ol>
+            <strong>Step 4 — Submit &amp; Collect Result Card:</strong>
+            <ol>
+              <li>Submit the signed clearance form to the Department Office.</li>
+              <li>Once result cards are announced, visit the department in person with your clearance form to collect it.</li>
+            </ol>
+            Note: Only the concerned student is permitted to collect their own result card.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question">If I score less in course improvement, which marks will be considered? <i class="faq-icon">+</i></div>
+          <div class="faq-answer">
+            If you attempt a course improvement and score lower than your previous attempt, your
+            original (higher) marks will be retained. The new lower marks will not replace the
+            previous result.
+          </div>
+        </div>
+
+      </div><!-- /faq-col right -->
+
+    </div><!-- /faq-grid -->
   </section>
 
   <!-- ══ Global Footer ══ -->
@@ -169,7 +506,7 @@
   </footer>
 
   <script>
-    // Chatbot Functionality
+    // ── Chatbot Functionality ──────────────────────────────────────────────────
     const chatArea  = document.getElementById('chat-area');
     const userInput = document.getElementById('user-input');
     const sendBtn   = document.getElementById('send-btn');
@@ -183,8 +520,9 @@
     }
 
     async function botReply(userText) {
-      let reply;
       const lower = userText.toLowerCase();
+      let reply;
+
       if (lower.includes("admission")) {
         reply = "Admissions are open! Visit the IUB official website for details.";
       } else if (lower.includes("contact")) {
@@ -204,6 +542,7 @@
           reply = "⚠️ Sorry, I couldn't connect to the server. Please try again later.";
         }
       }
+
       setTimeout(() => addMessage(reply, 'bot'), 600);
     }
 
@@ -218,10 +557,10 @@
     sendBtn.addEventListener('click', handleSend);
     userInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSend(); });
 
-    // FAQ's Accordion Functionality
+    // ── FAQ Accordion Functionality ───────────────────────────────────────────
     document.querySelectorAll('.faq-question').forEach(q => {
       q.addEventListener('click', () => {
-        const item = q.parentElement;
+        const item   = q.parentElement;
         const isOpen = item.classList.contains('open');
         document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
         if (!isOpen) item.classList.add('open');
