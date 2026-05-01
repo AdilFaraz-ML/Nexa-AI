@@ -3,56 +3,74 @@ import json
 import re
 from dotenv import load_dotenv
 from langchain_core.documents import Document
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEmbeddings
-
 from langchain_pinecone import PineconeVectorStore
 
 load_dotenv()
 
-# Same embedding model you were using
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-def extract_metadata(text):
+# ─────────────────────────────────────────
+# SIMPLE MERGED RETRIEVER (no external import)
+# ─────────────────────────────────────────
+class SimpleMergedRetriever:
+    def __init__(self, retrievers):
+        self.retrievers = retrievers
+
+    def invoke(self, query):
+        all_docs = []
+        seen = set()
+        for r in self.retrievers:
+            for doc in r.invoke(query):
+                if doc.page_content not in seen:
+                    seen.add(doc.page_content)
+                    all_docs.append(doc)
+        return all_docs
+
+# ─────────────────────────────────────────
+# METADATA EXTRACTOR
+# ─────────────────────────────────────────
+def extract_metadata(text, source_name):
     metadata = {
         "type": "transport",
-        "source": "transport_schedule"
+        "source": source_name
     }
 
-    # Route detection
-    if "AC to KH" in text:
-        metadata["route"] = "AC-KH"
-    elif "AC to BIC" in text:
-        metadata["route"] = "AC-BIC"
+    if "AC to KH" in text or "AC to KH and FC" in text:
+        metadata["route"] = "AC-KH-FC"
+    elif "AC to BJC" in text:
+        metadata["route"] = "AC-BJC"
     elif "BJC to AC" in text:
         metadata["route"] = "BJC-AC"
-    elif "KH to AC" in text:
-        metadata["route"] = "KH-AC"
+    elif "KH and FC to AC" in text or "KH to AC" in text:
+        metadata["route"] = "KH-FC-AC"
 
-    # Time extraction
-    time_match = re.findall(r'\d{1,2}:\d{2}\s?(AM|PM)', text)
+    time_match = re.findall(r'\d{1,2}:\d{2}\s?(?:AM|PM)', text)
     if time_match:
-        metadata["time"] = " ".join(time_match)
+        metadata["timings"] = ", ".join(time_match)
 
-    # Category
     if "morning" in text.lower():
-        metadata["category"] = "morning"
+        metadata["shift"] = "morning"
     elif "afternoon" in text.lower():
-        metadata["category"] = "afternoon"
+        metadata["shift"] = "afternoon"
     elif "evening" in text.lower():
-        metadata["category"] = "evening"
+        metadata["shift"] = "evening"
+    elif "all-day" in text.lower() or "complete" in text.lower():
+        metadata["shift"] = "all"
 
-    # Special bus
+    metadata["day"] = "saturday" if "saturday" in text.lower() else "weekday"
+
     if "SB1" in text or "SB2" in text:
         metadata["special_bus"] = True
 
     return metadata
 
-
-def load_json_file(filepath, source_name):
-    """Load any JSON file and convert to Documents"""
+# ─────────────────────────────────────────
+# LOAD TRANSPORT JSON → Documents
+# ─────────────────────────────────────────
+def load_transport_json(filepath: str, source_name: str) -> list:
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -60,56 +78,84 @@ def load_json_file(filepath, source_name):
     for item in data:
         text = item["content"]
 
-        enriched = f"""
-Transport Schedule Info:
-{text}
+        if "metadata" in item:
+            metadata = item["metadata"]
+            metadata["source"] = source_name
+        else:
+            metadata = extract_metadata(text, source_name)
 
-Route Abbreviations:
-AC = Abbasia Campus
-KH = Khawaja Fareed Campus
-FC = Faculty Campus
-BIC = Baghdad-ul-Jadeed Campus
-"""
-        metadata = extract_metadata(text)
-        metadata["source"] = source_name
+        enriched = f"""{text}
+
+Route Abbreviations: AC = Abbasia Campus | KH or KH.FC = Khawaja Fareed Campus | BJC = Baghdad Campus | FC = Faculty Campus | S after bus number = Staff colony bus | SB = School Bus"""
 
         docs.append(Document(
             page_content=enriched,
             metadata=metadata
         ))
 
+    print(f"Loaded {len(docs)} documents from {filepath}")
     return docs
 
+# ─────────────────────────────────────────
+# UPLOAD TRANSPORT DATA → iub-transport
+# ─────────────────────────────────────────
+def build_transport_index():
+    """Run this once to upload transport_schedule.json to iub-transport index"""
 
-def build_vectorstore():
-    all_docs = []
-
-    # Add all your JSON files here
-    json_files = [
+    transport_files = [
         ("transport_schedule.json", "transport_schedule"),
-        # ("another_file.json", "another_source"),  # add more here
     ]
 
-    for filepath, source_name in json_files:
-        docs = load_json_file(filepath, source_name)
+    all_docs = []
+    for filepath, source_name in transport_files:
+        docs = load_transport_json(filepath, source_name)
         all_docs.extend(docs)
-        print(f"Loaded {len(docs)} items from {filepath}")
 
-    # Split
-    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
-    chunks = splitter.split_documents(all_docs)
-    print(f"Total chunks: {len(chunks)}")
+    # NO splitting — each entry has full route timings in one chunk
+    print(f"Uploading {len(all_docs)} documents to iub-transport index...")
 
-    # Embed + push to Pinecone
-    vectorstore = PineconeVectorStore.from_documents(
-        documents=chunks,
+    PineconeVectorStore.from_documents(
+        documents=all_docs,
         embedding=embeddings,
-        index_name="iub-chatbot"
+        index_name="iub-transport-data"
     )
 
-    print("All data uploaded to Pinecone successfully.")
-    return vectorstore
+    print("Transport data uploaded to iub-transport successfully.")
 
+# ─────────────────────────────────────────
+# MERGED RETRIEVER — both indexes at once
+# ─────────────────────────────────────────
+def get_merged_retriever() -> SimpleMergedRetriever:
+    """
+    Returns a single retriever that queries both indexes simultaneously.
+    Import and use this in app.py.
+    """
 
+    vectorstore_general = PineconeVectorStore.from_existing_index(
+        index_name="iub-chatbot",
+        embedding=embeddings
+    )
+
+    vectorstore_transport = PineconeVectorStore.from_existing_index(
+        index_name="iub-transport-data",
+        embedding=embeddings
+    )
+
+    retriever_general = vectorstore_general.as_retriever(
+        search_type="mmr",
+        search_kwargs={"k": 3}
+    )
+
+    retriever_transport = vectorstore_transport.as_retriever(
+        search_type="mmr",
+        search_kwargs={"k": 4}
+    )
+
+    print("[VectorStore] Merged retriever ready (iub-chatbot + iub-transport)")
+    return SimpleMergedRetriever([retriever_general, retriever_transport])
+
+# ─────────────────────────────────────────
+# MAIN — run to upload transport data
+# ─────────────────────────────────────────
 if __name__ == "__main__":
-    build_vectorstore()
+    build_transport_index()
