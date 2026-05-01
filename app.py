@@ -16,9 +16,8 @@ os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "nexa-secret-123")
 
-# ─────────────────────────────────────────
+
 # LLM + MERGED RETRIEVER
-# ─────────────────────────────────────────
 llm = ChatGroq(
     model="llama-3.3-70b-versatile",
     temperature=0,
@@ -27,18 +26,16 @@ llm = ChatGroq(
 
 merged_retriever = get_merged_retriever()
 
-# ─────────────────────────────────────────
+
 # GREETINGS
-# ─────────────────────────────────────────
 GREETINGS = [
     "hi", "hello", "hey", "salam", "assalam", "assalamualaikum",
     "good morning", "good afternoon", "good evening",
     "howdy", "whats up", "what's up", "greetings"
 ]
 
-# ─────────────────────────────────────────
+
 # SESSION HISTORY STORE
-# ─────────────────────────────────────────
 MAX_SESSIONS = 500
 session_histories = {}
 
@@ -58,9 +55,8 @@ def append_history(session_id: str, user_msg: str, ai_reply: str):
     if len(history) > 10:
         session_histories[session_id] = history[-10:]
 
-# ─────────────────────────────────────────
+
 # STEP 1 — QUERY REWRITER
-# ─────────────────────────────────────────
 REWRITER_PROMPT = """
 You are a query rewriter for a university chatbot.
 
@@ -104,9 +100,8 @@ def rewrite_query(user_msg: str, history: list) -> str:
         print(f"Rewriter error: {e}")
         return user_msg
 
-# ─────────────────────────────────────────
+
 # STEP 2 — QUESTION ROUTER
-# ─────────────────────────────────────────
 ROUTER_SYSTEM_PROMPT = """
 You are a query classifier for Nexa AI, the chatbot of Islamia University of Bahawalpur (IUB).
 
@@ -138,9 +133,8 @@ def classify_question(rewritten_query: str) -> str:
     except Exception:
         return "IUB"
 
-# ─────────────────────────────────────────
+
 # STEP 3A — IUB RAG ANSWER
-# ─────────────────────────────────────────
 IUB_SYSTEM_PROMPT = """
 You are Nexa AI, the official AI assistant of Islamia University of Bahawalpur (IUB).
 Answer student queries using the retrieved context below as your primary source.
@@ -233,9 +227,8 @@ def answer_iub_question(rewritten_query: str, original_msg: str, session_id: str
         print(f"IUB answer error: {e}")
         return "Something went wrong. Please try again."
 
-# ─────────────────────────────────────────
+
 # STEP 3B — EDUCATION DIRECT ANSWER
-# ─────────────────────────────────────────
 EDUCATION_SYSTEM_PROMPT = """
 You are Nexa AI, the assistant of Islamia University of Bahawalpur (IUB).
 Answer general education and career advice questions from your own knowledge.
@@ -255,9 +248,8 @@ def answer_education_question(rewritten_query: str, original_msg: str, session_i
         print(f"Education answer error: {e}")
         return "I couldn't process that. Please try again."
 
-# ─────────────────────────────────────────
+
 # DATABASE
-# ─────────────────────────────────────────
 def init_db():
     if not os.path.exists("university.db"):
         conn = sqlite3.connect("university.db")
@@ -278,10 +270,8 @@ def init_db():
 
 init_db()
 
-# ─────────────────────────────────────────
+
 # ROUTES
-# ─────────────────────────────────────────
-# ✅ Fix 2 — removed "I'm not able to help with that topic."
 OUT_OF_SCOPE_REPLY = (
     "I'm Nexa AI, designed specifically to assist with IUB-related queries and general education guidance. "
     "Feel free to ask me about admissions, courses, transport, scholarships, or career advice!"

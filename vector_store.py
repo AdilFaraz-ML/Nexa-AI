@@ -12,9 +12,8 @@ embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
-# ─────────────────────────────────────────
+
 # SIMPLE MERGED RETRIEVER (no external import)
-# ─────────────────────────────────────────
 class SimpleMergedRetriever:
     def __init__(self, retrievers):
         self.retrievers = retrievers
@@ -29,9 +28,8 @@ class SimpleMergedRetriever:
                     all_docs.append(doc)
         return all_docs
 
-# ─────────────────────────────────────────
+
 # METADATA EXTRACTOR
-# ─────────────────────────────────────────
 def extract_metadata(text, source_name):
     metadata = {
         "type": "transport",
@@ -67,9 +65,8 @@ def extract_metadata(text, source_name):
 
     return metadata
 
-# ─────────────────────────────────────────
+
 # LOAD TRANSPORT JSON → Documents
-# ─────────────────────────────────────────
 def load_transport_json(filepath: str, source_name: str) -> list:
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -96,9 +93,8 @@ Route Abbreviations: AC = Abbasia Campus | KH or KH.FC = Khawaja Fareed Campus |
     print(f"Loaded {len(docs)} documents from {filepath}")
     return docs
 
-# ─────────────────────────────────────────
+
 # UPLOAD TRANSPORT DATA → iub-transport
-# ─────────────────────────────────────────
 def build_transport_index():
     """Run this once to upload transport_schedule.json to iub-transport index"""
 
@@ -122,9 +118,8 @@ def build_transport_index():
 
     print("Transport data uploaded to iub-transport successfully.")
 
-# ─────────────────────────────────────────
+
 # MERGED RETRIEVER — both indexes at once
-# ─────────────────────────────────────────
 def get_merged_retriever() -> SimpleMergedRetriever:
     """
     Returns a single retriever that queries both indexes simultaneously.
@@ -154,8 +149,7 @@ def get_merged_retriever() -> SimpleMergedRetriever:
     print("[VectorStore] Merged retriever ready (iub-chatbot + iub-transport)")
     return SimpleMergedRetriever([retriever_general, retriever_transport])
 
-# ─────────────────────────────────────────
+
 # MAIN — run to upload transport data
-# ─────────────────────────────────────────
 if __name__ == "__main__":
     build_transport_index()
