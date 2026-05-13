@@ -1,5 +1,8 @@
 import os
+import re
+import json
 import sqlite3
+import threading
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify, session
 from langchain_groq import ChatGroq
@@ -56,85 +59,62 @@ def append_history(session_id: str, user_msg: str, ai_reply: str):
         session_histories[session_id] = history[-10:]
 
 
-# STEP 1 — QUERY REWRITER
-REWRITER_PROMPT = """
-You are a query rewriter for a university chatbot.
+# STEP 1+2 COMBINED — REWRITE + CLASSIFY IN ONE GROQ CALL
+REWRITER_ROUTER_PROMPT = """
+You are a query processor for Nexa AI, the chatbot of Islamia University of Bahawalpur (IUB).
 
-Your job: Given the conversation history and the user's latest message,
-rewrite the latest message into a COMPLETE, STANDALONE search query
-that can be understood WITHOUT any prior context.
+You have TWO jobs — do both in ONE response:
 
-Rules:
-- Resolve all pronouns and references ("it", "that", "before it", "after it", "the previous one")
-- Use the history to figure out what "it" refers to
-- Output ONLY the rewritten query — no explanation, no quotes, nothing else
+JOB 1 — REWRITE:
+Rewrite the user's latest message into a complete, standalone search query
+using conversation history to resolve pronouns and references.
+If already clear, return as-is.
+
+JOB 2 — CLASSIFY:
+Classify the rewritten query into exactly one category:
+- IUB: anything about IUB (admissions, transport, fees, departments, hostel, exams, scholarships, portal, campus)
+- EDUCATION: general education/career advice, degree comparisons — NOT specific to IUB
+- OUT_OF_SCOPE: weather, cricket, jokes, cooking, politics — nothing to do with IUB or education
+
+OUTPUT FORMAT (strict JSON, nothing else, no markdown, no explanation):
+{"rewritten": "<rewritten query here>", "category": "IUB"}
 
 Examples:
-History: User asked "is there a bus at 2 PM from BJC to AC?", Bot said "No bus at 2 PM, nearest is 3 PM"
-User says: "before it"
-Rewritten: "bus timing before 3 PM from BJC to AC route"
+History: User asked about bus at 2 PM, bot said nearest is 3 PM
+User: "before it"
+Output: {"rewritten": "bus timing before 3 PM from BJC to AC route", "category": "IUB"}
 
-History: User asked "what scholarships are available for BS students?"
-User says: "what is the eligibility for that?"
-Rewritten: "eligibility criteria for BS student scholarships at IUB"
+User: "what is scope of BSCS?"
+Output: {"rewritten": "what is scope of BSCS?", "category": "EDUCATION"}
 
-History: User asked "Should I do BSCS or SE?"
-User says: "which has more scope?"
-Rewritten: "which has more job scope BSCS or Software Engineering"
-
-If the message is already clear and standalone, return it as-is.
+User: "tell me a joke"
+Output: {"rewritten": "tell me a joke", "category": "OUT_OF_SCOPE"}
 """
 
-def rewrite_query(user_msg: str, history: list) -> str:
-    if not history:
-        return user_msg
+def rewrite_and_classify(user_msg: str, history: list) -> tuple:
+    """Single Groq call: returns (rewritten_query, category)"""
     try:
-        messages = [SystemMessage(content=REWRITER_PROMPT)]
-        messages.extend(history[-6:])
-        messages.append(HumanMessage(content=f"Rewrite this: {user_msg}"))
+        messages = [SystemMessage(content=REWRITER_ROUTER_PROMPT)]
+        if history:
+            messages.extend(history[-6:])
+        messages.append(HumanMessage(content=f"User message: {user_msg}"))
         response = llm.invoke(messages)
-        rewritten = response.content.strip()
-        print(f"[REWRITER] '{user_msg}' → '{rewritten}'")
-        return rewritten
-    except Exception as e:
-        print(f"Rewriter error: {e}")
-        return user_msg
-
-
-# STEP 2 — QUESTION ROUTER
-ROUTER_SYSTEM_PROMPT = """
-You are a query classifier for Nexa AI, the chatbot of Islamia University of Bahawalpur (IUB).
-
-Classify the user's question into exactly ONE of these three categories:
-
-1. IUB — Question is specifically about IUB: admissions, fee, transport, departments,
-   scholarships, hostel, timetable, exams, faculty, campus, portal, courses at IUB, etc.
-
-2. EDUCATION — Question is about general education, career advice, degree comparisons,
-   academic fields, study tips — but NOT specific to IUB.
-
-3. OUT_OF_SCOPE — Nothing to do with IUB or education.
-   Examples: weather, cricket, jokes, poems, cooking, politics.
-
-Reply with ONLY one word: IUB, EDUCATION, or OUT_OF_SCOPE.
-No explanation. No punctuation. Just the category word.
-"""
-
-def classify_question(rewritten_query: str) -> str:
-    try:
-        response = llm.invoke([
-            SystemMessage(content=ROUTER_SYSTEM_PROMPT),
-            HumanMessage(content=rewritten_query)
-        ])
-        category = response.content.strip().upper()
+        raw = response.content.strip()
+        raw = re.sub(r"```json|```", "", raw).strip()
+        parsed = json.loads(raw)
+        rewritten = parsed.get("rewritten", user_msg)
+        category = parsed.get("category", "IUB").upper()
         if category not in ["IUB", "EDUCATION", "OUT_OF_SCOPE"]:
-            return "IUB"
-        return category
-    except Exception:
-        return "IUB"
+            category = "IUB"
+        print(f"[REWRITER] '{user_msg}' → '{rewritten}'")
+        print(f"[ROUTER] Category: {category}")
+        return rewritten, category
+    except Exception as e:
+        print(f"Rewrite+classify error: {e}")
+        return user_msg, "IUB"
 
 
-# STEP 3A — IUB RAG ANSWER
+# STEP 3A — IUB RAG ANSWER (with parallel retrieval)
 IUB_SYSTEM_PROMPT = """
 You are Nexa AI, the official AI assistant of Islamia University of Bahawalpur (IUB).
 Answer student queries using the retrieved context below as your primary source.
@@ -202,23 +182,36 @@ def answer_iub_question(rewritten_query: str, original_msg: str, session_id: str
     try:
         history = get_history(session_id)
 
-        docs = merged_retriever.invoke(rewritten_query)
+        # Run Pinecone retrieval in a background thread
+        docs_result = []
+        def fetch_docs():
+            docs_result.extend(merged_retriever.invoke(rewritten_query))
 
+        retrieval_thread = threading.Thread(target=fetch_docs)
+        retrieval_thread.start()
+
+        # While retrieval runs, build the message list (CPU only, no API call)
+        messages_base = []
+        messages_base.extend(history[-10:])
+        messages_base.append(HumanMessage(content=original_msg))
+
+        # Wait for retrieval to finish
+        retrieval_thread.join(timeout=10)
+
+        # Deduplicate docs
         seen = set()
         unique_docs = []
-        for doc in docs:
+        for doc in docs_result:
             if doc.page_content not in seen:
                 seen.add(doc.page_content)
                 unique_docs.append(doc)
 
         context = "\n\n".join(doc.page_content for doc in unique_docs)
-
         if not context.strip():
             context = "No relevant information found in the knowledge base."
 
         messages = [SystemMessage(content=IUB_SYSTEM_PROMPT.format(context=context))]
-        messages.extend(history[-10:])
-        messages.append(HumanMessage(content=original_msg))
+        messages.extend(messages_base)
 
         response = llm.invoke(messages)
         return response.content.strip()
@@ -293,7 +286,7 @@ def get_response():
         session["session_id"] = os.urandom(16).hex()
     session_id = session["session_id"]
 
-    # 1. Greeting check ✅ Fix 1
+    # 1. Greeting check
     if any(user_msg.lower().strip("!.,?") == g for g in GREETINGS):
         reply = "Hello! I'm Nexa AI, the official assistant of Islamia University of Bahawalpur. How can I help you today? Feel free to ask me about admissions, courses, transport, scholarships, or career advice!"
         append_history(session_id, user_msg, reply)
@@ -319,15 +312,11 @@ def get_response():
             return jsonify({"reply": answer})
     conn.close()
 
-    # 4. Rewrite vague follow-ups into full standalone queries
+    # 4. Rewrite + Classify in ONE Groq call
     history = get_history(session_id)
-    rewritten = rewrite_query(user_msg, history)
+    rewritten, category = rewrite_and_classify(user_msg, history)
 
-    # 5. Classify
-    category = classify_question(rewritten)
-    print(f"[ROUTER] Category: {category} | Original: '{user_msg}' | Rewritten: '{rewritten}'")
-
-    # 6. Route and answer
+    # 5. Route and answer
     if category == "OUT_OF_SCOPE":
         return jsonify({"reply": OUT_OF_SCOPE_REPLY})
 

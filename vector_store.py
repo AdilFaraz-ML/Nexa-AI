@@ -12,20 +12,46 @@ embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2"
 )
 
+# TRANSPORT KEYWORDS — used to decide which index to query
+TRANSPORT_KEYWORDS = [
+    "bus", "route", "timing", "transport", "pick", "pickup",
+    "schedule", "van", "shuttle", "BJC", "AC", "KH", "fc",
+    "abbasia", "baghdad", "khawaja", "drop", "am", "pm",
+    "morning", "afternoon", "evening", "arrive", "depart"
+]
 
-# SIMPLE MERGED RETRIEVER (no external import)
+def is_transport_query(query: str) -> bool:
+    q = query.lower()
+    return any(kw.lower() in q for kw in TRANSPORT_KEYWORDS)
+
+
+# SMART MERGED RETRIEVER
 class SimpleMergedRetriever:
-    def __init__(self, retrievers):
-        self.retrievers = retrievers
+    def __init__(self, retriever_general, retriever_transport):
+        self.retriever_general = retriever_general
+        self.retriever_transport = retriever_transport
 
-    def invoke(self, query):
+    def invoke(self, query: str):
         all_docs = []
         seen = set()
-        for r in self.retrievers:
+
+        transport = is_transport_query(query)
+
+        if transport:
+            # Transport query — use both but prioritize transport
+            print(f"[RETRIEVER] Transport query detected → fetching transport + general")
+            sources = [self.retriever_transport, self.retriever_general]
+        else:
+            # Non-transport query — only use general index
+            print(f"[RETRIEVER] General query detected → fetching general only")
+            sources = [self.retriever_general]
+
+        for r in sources:
             for doc in r.invoke(query):
                 if doc.page_content not in seen:
                     seen.add(doc.page_content)
                     all_docs.append(doc)
+
         return all_docs
 
 
@@ -96,8 +122,6 @@ Route Abbreviations: AC = Abbasia Campus | KH or KH.FC = Khawaja Fareed Campus |
 
 # UPLOAD TRANSPORT DATA → iub-transport
 def build_transport_index():
-    """Run this once to upload transport_schedule.json to iub-transport index"""
-
     transport_files = [
         ("transport_schedule.json", "transport_schedule"),
     ]
@@ -107,7 +131,6 @@ def build_transport_index():
         docs = load_transport_json(filepath, source_name)
         all_docs.extend(docs)
 
-    # NO splitting — each entry has full route timings in one chunk
     print(f"Uploading {len(all_docs)} documents to iub-transport index...")
 
     PineconeVectorStore.from_documents(
@@ -119,13 +142,8 @@ def build_transport_index():
     print("Transport data uploaded to iub-transport successfully.")
 
 
-# MERGED RETRIEVER — both indexes at once
+# MERGED RETRIEVER — smart routing
 def get_merged_retriever() -> SimpleMergedRetriever:
-    """
-    Returns a single retriever that queries both indexes simultaneously.
-    Import and use this in app.py.
-    """
-
     vectorstore_general = PineconeVectorStore.from_existing_index(
         index_name="iub-chatbot",
         embedding=embeddings
@@ -138,7 +156,7 @@ def get_merged_retriever() -> SimpleMergedRetriever:
 
     retriever_general = vectorstore_general.as_retriever(
         search_type="mmr",
-        search_kwargs={"k": 3}
+        search_kwargs={"k": 5}  # increased from 3 → 5 for better admission coverage
     )
 
     retriever_transport = vectorstore_transport.as_retriever(
@@ -147,7 +165,7 @@ def get_merged_retriever() -> SimpleMergedRetriever:
     )
 
     print("[VectorStore] Merged retriever ready (iub-chatbot + iub-transport)")
-    return SimpleMergedRetriever([retriever_general, retriever_transport])
+    return SimpleMergedRetriever(retriever_general, retriever_transport)
 
 
 # MAIN — run to upload transport data
