@@ -519,31 +519,18 @@
       chatArea.scrollTop = chatArea.scrollHeight;
     }
 
-    async function botReply(userText) {
-      const lower = userText.toLowerCase();
-      let reply;
-
-      if (lower.includes("admission")) {
-        reply = "Admissions are open! Visit the IUB official website for details.";
-      } else if (lower.includes("contact")) {
-        reply = "You can contact IUB at +92-62-9250235.";
-      } else if (lower.includes("help")) {
-        reply = "Sure! I'm here to assist. Ask me about admissions, departments, or events.";
-      } else {
-        try {
-          const response = await fetch('/get_response', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: userText })
-          });
-          const data = await response.json();
-          reply = data.reply;
-        } catch (err) {
-          reply = "⚠️ Sorry, I couldn't connect to the server. Please try again later.";
-        }
+ async function botReply(userText) {
+      try {
+        const response = await fetch('/get_response', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: userText })
+        });
+        const data = await response.json();
+        setTimeout(() => addMessage(data.reply, 'bot'), 600);
+      } catch (err) {
+        setTimeout(() => addMessage("⚠️ Sorry, I couldn't connect to the server. Please try again later.", 'bot'), 600);
       }
-
-      setTimeout(() => addMessage(reply, 'bot'), 600);
     }
 
     async function handleSend() {
